@@ -411,7 +411,7 @@ export class QueryService {
       }
       const b = this.boundary(dir === 'out' ? t.dist.keys() : [start.id, ...t.dist.keys()]);
       return {
-        query: { tool, symbolId: start.id, depth, limit: this.limitOf(opts.limit), relations: [...follow, ...leaf, 'IMPLEMENTED_BY'] },
+        query: { tool, symbolId: start.id, depth, limit: this.limitOf(opts.limit), offset: page.offset, relations: [...follow, ...leaf, 'IMPLEMENTED_BY'] },
         graph: this.graphMeta(),
         results: page.items,
         nodes: this.nodesMap(ids),
@@ -531,11 +531,11 @@ export class QueryService {
       const a = JSON.parse(r.attributes_json);
       return methodOk(a.method) && a.path === path;
     });
-    if (exact.length) return exact.map((route) => ({ route, matchType: 'pattern' as const }));
-    const out: { route: NodeRow; matchType: 'concrete'; params?: Record<string, string> }[] = [];
+    const out: { route: NodeRow; matchType: 'pattern' | 'concrete'; params?: Record<string, string> }[] = exact.map((route) => ({ route, matchType: 'pattern' as const }));
+    const exactIds = new Set(exact.map((r) => r.id));
     for (const r of routes) {
       const a = JSON.parse(r.attributes_json);
-      if (!methodOk(a.method) || a.metadata?.regex) continue;
+      if (exactIds.has(r.id) || !methodOk(a.method) || a.metadata?.regex) continue;
       const params = routeMatcher(a.path)(path);
       if (params) out.push({ route: r, matchType: 'concrete', params });
     }
@@ -792,7 +792,7 @@ export class QueryService {
       const page = this.page(items, opts);
       const diags = this.q("SELECT file_path, severity, code, message, start_line, start_col FROM diagnostics WHERE severity IN ('error','warning') ORDER BY severity, file_path, start_line, code LIMIT 50").all();
       return {
-        query: { tool: 'get_unresolved', file: opts.file ?? null, kind: opts.kind ?? null, reason: opts.reason ?? null, groupBy: opts.groupBy ?? null },
+        query: { tool: 'get_unresolved', file: opts.file ?? null, kind: opts.kind ?? null, reason: opts.reason ?? null, groupBy: opts.groupBy ?? null, offset: page.offset },
         graph: this.graphMeta(),
         counts: { unresolved: items.length, byStatus, filtered: classCounts },
         ...(groups ? { groups } : {}),
@@ -975,7 +975,7 @@ export class QueryService {
     return this.read(() => {
       const a = this.resolveSymbol(from);
       const b = this.resolveSymbol(to);
-      const maxDepth = this.depthOf(opts.maxDepth);
+      const maxDepth = opts.maxDepth === undefined ? this.loaded.config.query.maxDepth : this.depthOf(opts.maxDepth);
       const maxPaths = Math.min(opts.limit ?? 5, 20);
       const kinds: EdgeKind[] = ['ROUTES_TO', 'IMPLEMENTED_BY', 'CALLS', 'READS_MODEL', 'WRITES_MODEL', 'USES_MODEL', 'GUARDED_BY', 'REFERENCES'];
       const parents = new Map<string, { from: string; relation: string }[]>();
@@ -1087,6 +1087,7 @@ export class QueryService {
       graph: this.graphMeta(),
       projectRoot: this.loaded.root,
       lastSyncSummary: getMeta(this.db, 'lastSyncSummary') ?? null,
+      lastChangeSummary: getMeta(this.db, 'lastChangeSummary') ?? null,
       pendingErrors: this.q("SELECT file_path AS file, code, message FROM diagnostics WHERE owner LIKE '#parse:%' ORDER BY file_path LIMIT 20").all(),
       brokenFiles: this.q("SELECT path, status FROM files WHERE status != 'ok' ORDER BY path").all(),
       coverage: this.coverage(),

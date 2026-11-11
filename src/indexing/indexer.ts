@@ -598,7 +598,13 @@ export class GraphIndexer {
       const status: IndexStatus = brokenCount > 0 ? 'stale' : 'current';
       const fileCount = db.prepare('SELECT count(*) FROM files').pluck().get() as number;
       const summary = tracker.summary(generation);
-      setMeta(db, 'generation', generation);
+      // A sync that changed nothing does not create a new generation (keeps cursors valid).
+      const prevStatus = getMeta<string>(db, 'indexStatus');
+      const changed =
+        full || parsedOk.length > 0 || deleted.length > 0 || broken.length > 0 || prevStatus !== status || Object.values(summary.totals).some((n) => n > 0);
+      const committedGeneration = changed ? generation : prevGen;
+      summary.generation = committedGeneration;
+      setMeta(db, 'generation', committedGeneration);
       setMeta(db, 'indexerVersion', INDEXER_VERSION);
       setMeta(db, 'projectRoot', this.loaded.root);
       setMeta(db, 'configHash', this.loaded.hash);
@@ -607,7 +613,8 @@ export class GraphIndexer {
       setMeta(db, 'lastSuccessfulScanAt', new Date().toISOString());
       setMeta(db, 'fileCount', fileCount);
       setMeta(db, 'lastSyncSummary', summary);
-      return { generation, status, summary };
+      if (changed) setMeta(db, 'lastChangeSummary', summary);
+      return { generation: committedGeneration, status, summary };
     });
 
     let out: { generation: number; status: IndexStatus; summary: ChangeSummary };
