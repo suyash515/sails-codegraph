@@ -4,7 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-This repository is **pre-implementation**. The only source of truth is `sails-codegraph-implementation-spec.md`, a detailed spec for v0.1.0. Read the relevant spec sections before implementing anything; section numbers below point into it. No package scaffold, build, lint, or test commands exist yet. **Once Milestone 1 (§16) creates `package.json`, replace this note with the real build/lint/test commands, including how to run a single test.**
+v0.1.0 is implemented per `sails-codegraph-implementation-spec.md` (the source of truth; section numbers below point into it). See `docs/architecture.md` for how the implementation maps to the spec and `docs/implementation-report.md` for status and known limitations.
+
+Commands (Node 22.13+):
+
+```bash
+npm install
+npm run build          # tsc -> dist/ (tests run against dist/, so build before running tests directly)
+npm run typecheck      # also used as `npm run lint`
+npm test               # build + all unit and integration tests (node:test)
+npm run test:unit      # unit tests only (needs a prior build)
+npm run test:pack      # npm pack + install into a fresh fixture app (T38)
+npm run schema         # regenerate sails-codegraph.config.schema.json after changing src/config/schema.ts
+npm run bench          # synthetic benchmark (pass a file count: node scripts/bench.mjs 1400)
+# single test file / single test:
+node --test tests/integration/incremental.test.mjs
+node --test --test-name-pattern="T23" tests/integration/incremental.test.mjs
+```
+
+Tests are plain ESM (`tests/**/*.test.mjs`) using `node:test` (vitest could not be installed due to an npm arborist bug in this environment). They import from `dist/`, copy fixtures from `tests/fixtures/` into temp dirs, and never mutate the fixtures. `tests/fixtures/expected/sails-app.edges.json` is the hand-validated ground truth for the main fixture; update it deliberately (after reviewing each relationship) when changing resolution behavior.
 
 ## What is being built
 

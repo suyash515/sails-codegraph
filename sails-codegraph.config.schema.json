@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "sails-codegraph configuration",
+  "description": "Configuration for sails-codegraph (JSON only; never executed). Unknown keys produce warnings.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "root": {
+      "default": ".",
+      "type": "string"
+    },
+    "include": {
+      "default": [
+        "api/**/*.js",
+        "config/routes.js",
+        "config/policies.js",
+        "config/globals.js"
+      ],
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "exclude": {
+      "default": [
+        "**/node_modules/**",
+        "**/.git/**",
+        "**/.tmp/**",
+        "**/assets/**",
+        "**/.sails-codegraph/**"
+      ],
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "storage": {
+      "default": {
+        "directory": ".sails-codegraph",
+        "database": "graph.sqlite"
+      },
+      "type": "object",
+      "properties": {
+        "directory": {
+          "default": ".sails-codegraph",
+          "type": "string",
+          "minLength": 1
+        },
+        "database": {
+          "default": "graph.sqlite",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "indexing": {
+      "default": {
+        "debounceMs": 300,
+        "reconcileIntervalMs": 30000,
+        "mcpScanIntervalMs": 2000,
+        "maxFileBytes": 2000000,
+        "followSymlinks": false
+      },
+      "type": "object",
+      "properties": {
+        "debounceMs": {
+          "default": 300,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60000
+        },
+        "reconcileIntervalMs": {
+          "default": 30000,
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 3600000
+        },
+        "mcpScanIntervalMs": {
+          "default": 2000,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600000
+        },
+        "maxFileBytes": {
+          "default": 2000000,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000000
+        },
+        "followSymlinks": {
+          "default": false,
+          "type": "boolean"
+        }
+      }
+    },
+    "resolution": {
+      "default": {
+        "framework": "sails",
+        "includeExplicitRoutes": true,
+        "includePolicies": true,
+        "includeModelAssociations": true,
+        "honorGlobalsConfig": true,
+        "followRouteFileRequires": true,
+        "extraModelReadMethods": [],
+        "extraModelWriteMethods": [],
+        "externalGlobals": []
+      },
+      "type": "object",
+      "properties": {
+        "framework": {
+          "default": "sails",
+          "type": "string",
+          "const": "sails"
+        },
+        "includeExplicitRoutes": {
+          "default": true,
+          "type": "boolean"
+        },
+        "includePolicies": {
+          "default": true,
+          "type": "boolean"
+        },
+        "includeModelAssociations": {
+          "default": true,
+          "type": "boolean"
+        },
+        "honorGlobalsConfig": {
+          "default": true,
+          "type": "boolean"
+        },
+        "followRouteFileRequires": {
+          "default": true,
+          "type": "boolean"
+        },
+        "extraModelReadMethods": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z_$][\\w$]*$"
+          }
+        },
+        "extraModelWriteMethods": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z_$][\\w$]*$"
+          }
+        },
+        "externalGlobals": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z_$][\\w$]*$"
+          }
+        }
+      }
+    },
+    "query": {
+      "default": {
+        "defaultDepth": 2,
+        "maxDepth": 5,
+        "defaultLimit": 100,
+        "maxLimit": 500
+      },
+      "type": "object",
+      "properties": {
+        "defaultDepth": {
+          "default": 2,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "maxDepth": {
+          "default": 5,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "defaultLimit": {
+          "default": 100,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "maxLimit": {
+          "default": 500,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        }
+      }
+    },
+    "mcp": {
+      "default": {
+        "watch": false,
+        "maxResponseBytes": 200000
+      },
+      "type": "object",
+      "properties": {
+        "watch": {
+          "default": false,
+          "type": "boolean"
+        },
+        "maxResponseBytes": {
+          "default": 200000,
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 50000000
+        }
+      }
+    }
+  }
+}

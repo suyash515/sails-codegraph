@@ -36,13 +36,15 @@
     "static-analysis"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.build.json && chmod +x dist/cli/main.js",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json && node -e \"require('fs').chmodSync('dist/cli/main.js',0o755)\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "npm run typecheck",
     "test": "npm run build && node --test --test-concurrency=4 \"tests/unit/*.test.mjs\" \"tests/integration/*.test.mjs\"",
     "test:unit": "node --test \"tests/unit/*.test.mjs\"",
     "test:pack": "npm run build && node --test \"tests/packaging/*.test.mjs\"",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "schema": "npm run build && node scripts/gen-schema.mjs",
+    "bench": "npm run build && node scripts/bench.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.4.0",
