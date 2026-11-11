@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.sails-codegraph/
+*.tgz
+coverage/

@@ -1,0 +1,11 @@
+export { openProject, type Project, type ProjectOptions } from './project.js';
+export { GraphIndexer, type SyncResult, type SyncMetrics, type ChangeSummary, type CheckResult } from './indexing/indexer.js';
+export { SyncCoordinator } from './indexing/coordinator.js';
+export { startWatcher } from './indexing/watcher.js';
+export { QueryService } from './query/service.js';
+export { parseFile } from './parser/parse-file.js';
+export { loadConfig, type LoadedConfig } from './config/load.js';
+export { discoverProjectRoot } from './discovery/project-root.js';
+export { createMcpServer, runMcpServer } from './mcp/server.js';
+export * from './graph/types.js';
+export { PACKAGE_VERSION, INDEXER_VERSION } from './version.js';
