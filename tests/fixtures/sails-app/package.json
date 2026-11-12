@@ -1,0 +1,9 @@
+{
+  "name": "fixture-sails-app",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "sails": "^1.5.11",
+    "stripe": "^14.0.0"
+  }
+}
