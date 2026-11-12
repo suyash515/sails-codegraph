@@ -24,6 +24,55 @@ npx sails-codegraph stats
 
 `index` works without `init` (defaults are used). Add `.sails-codegraph/` to `.gitignore` (or run `init --update-gitignore`).
 
+### Installing from a local checkout (without publishing to npm)
+
+Build the package first; the `bin` points at `dist/cli/main.js`:
+
+```bash
+cd /path/to/sails-codegraph
+npm install
+npm run build
+```
+
+Then pick one of:
+
+**Tarball (closest to a real npm install).** Installs exactly what would be published, so it also catches packaging mistakes. Re-run `npm pack` and reinstall after code changes.
+
+```bash
+# in sails-codegraph
+npm pack                      # runs the build via prepack; creates sails-codegraph-<version>.tgz
+
+# in the Sails project
+npm install --save-dev /path/to/sails-codegraph/sails-codegraph-0.1.0.tgz
+npx sails-codegraph index
+```
+
+**`npm link` (fastest while iterating).** Symlinks the checkout; after code changes only `npm run build` is needed.
+
+```bash
+# in sails-codegraph
+npm link                      # exposes a global `sails-codegraph` command
+
+# optionally, in the Sails project, to put it in node_modules
+npm link sails-codegraph
+```
+
+Undo with `npm unlink -g sails-codegraph`.
+
+**`file:` dependency.** Same symlink behaviour as `npm link`, but recorded in the project's `package.json`. There is no `prepare` script, so run `npm run build` in the checkout yourself.
+
+```bash
+npm install --save-dev /path/to/sails-codegraph
+```
+
+To use a local checkout as an MCP server without installing it into the project, point the client at the built entry point:
+
+```bash
+claude mcp add sails-codegraph -- node /path/to/sails-codegraph/dist/cli/main.js mcp --root /path/to/sails-project
+```
+
+`better-sqlite3` is a native module and is built/downloaded for the Node version (22.13+) used by the Sails project. `npm run test:pack` exercises the tarball flow against a fixture app.
+
 ## Keeping the graph current
 
 ```bash

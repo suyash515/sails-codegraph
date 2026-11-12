@@ -913,7 +913,7 @@ export class QueryService {
       file,
       startLine: start,
       endLine: last,
-      truncated: last < end,
+      truncated: last < end || body.length > 8000,
       text: body.length > 8000 ? body.slice(0, 8000) : body,
       freshness: fresh ? 'matches_indexed_content' : 'file_changed_since_index',
     };
